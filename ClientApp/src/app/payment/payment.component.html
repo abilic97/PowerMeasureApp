@@ -1,0 +1,67 @@
+<div class="modal-header">
+  <h4 class="modal-title">Enter card details</h4>
+  <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss('Cross click')"></button>
+</div>
+<div class="col-md-7 offset-md-2">
+  <form *ngIf="!Secure3DHTML" (ngSubmit)="makePayment(f)" #f="ngForm">
+    <div class="row mb-4 mt-4">
+      <h3>Payment</h3>
+    </div>
+    <div class="d-flex row-cols-2">
+      <div class="form-group p-2">
+        <label for="firstName">First name</label>
+        <input required type="text" class="form-control" id="firstName" name="firstName" [(ngModel)]="model.firstName">
+      </div>
+      <div class="form-group p-2">
+        <label for="lastName">Last name</label>
+        <input required type="text" class="form-control" id="lastName" name="lastName" [(ngModel)]="model.lastName">
+      </div>
+    </div>
+    <div class="form-group p-2">
+      <label for="email">Email address</label>
+      <input required type="email" class="form-control" id="email" name="email" [(ngModel)]="model.email">
+    </div>
+    <div class="form-group p-2">
+      <label for="cardNumber">Card number</label>
+      <input required type="number" class="form-control" id="cardNumber" name="cardNumber"
+        [(ngModel)]="model.cardNumber">
+      <small class="form-text text-muted">16-digital card number</small>
+    </div>
+    <div class="d-flex row-cols-2">
+      <div class="form-group p-2">
+        <label for="cardExp">Card expiry</label>
+        <input required type="number" class="form-control" id="cardExp" name="cardExpiry"
+          [(ngModel)]="model.cardExpiry">
+        <small class="form-text text-muted">e.g 062025 (06-2025)</small>
+      </div>
+      <div class="form-group p-2">
+        <label for="cvv">Cvv</label>
+        <input required type="number" class="form-control" id="cvv" name="cvv" [(ngModel)]="model.cvv">
+        <small class="form-text text-muted">3-digits found on back of the card</small>
+      </div>
+    </div>
+    <div class="form-group p-2">
+      <label for="amount">Amount</label>
+      <input required type="number" class="form-control" id="amount" name="amount" [(ngModel)]="model.amount">
+    </div>
+    <div class="text-center m-4">
+      <button *ngIf="!isLoading" type="submit" class="btn btn-primary p-2 m-2" [disabled]="!f.valid">Pay now</button>
+    </div>
+    <div *ngIf="isLoading" class="spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </form>
+</div>
+
+<div class="ion-padding" *ngIf="Secure3DHTML">
+  <iframe [src]="Secure3DHTML" id="paygateFrame"
+    style="width: 98%;height: 400px;display: block;margin: auto;background: rgb(255, 255, 255);border:none;"></iframe>
+
+</div>
+
+<div class="row mt-4" *ngIf="paymentResult">
+  <div class="col-md-7 offset-2 text-center">Payment result</div>
+  <div class="alert alert-info col-md-7 offset-md-2 text-center">
+    {{ messageToDisplay }}
+  </div>
+</div>

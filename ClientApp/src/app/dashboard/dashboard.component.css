@@ -1,0 +1,17 @@
+.width-tc {
+    width: 75%;
+    margin: auto;
+}
+.w-img {
+    width: 100%;
+}
+
+.t-s {
+    text-transform: uppercase;
+    font-size: large;
+    font-weight: bold;
+}
+
+.color-blue-dark {
+    color: #02577a;
+}

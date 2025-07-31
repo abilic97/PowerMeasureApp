@@ -1,0 +1,55 @@
+<section class="vh-100 login-container">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col col-xl-8">
+                <div class="card card-border">
+                    <div class="row g-0">
+                        <div class="col-lg-4 logo-image-container">
+                            <img src="./../../assets/electric-tower-line-minimalist-logo-icon-illustration-vector.jpg"
+                                alt="login form" class="img-fluid p-3" style="border-radius: 1rem 0 0 1rem;" />
+                        </div>
+                        <div class="col-md-6 col-lg-7 d-flex align-items-center">
+                            <div class="card-body p-4 p-lg-5 text-black">
+                                <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                                    <div class="d-flex align-items-center mb-3 pb-1">
+                                        <div class="h1 fw-bold mb-0">Member Login</div>
+                                    </div>
+                                    <h5 class="fw-normal mb-3 pb-3">Sign into your account</h5>
+                                    <div class="form-outline mb-4">
+                                        <input type="email" id="email" formControlName="email" name="email"
+                                            aria-describedby="emailHelp"
+                                            [ngClass]="{ 'is-invalid': submitted && formControls['email'].errors }"
+                                            placeholder="Enter email" class="form-control form-control-lg" />
+                                        <div *ngIf="formControls['email'].errors" class="invalid-feedback">
+                                            <div *ngIf="formControls['email'].getError('email')">
+                                                Enter a valid e-mail address</div>
+                                            <div *ngIf="formControls['email'].getError('required')">
+                                                E-mail is required</div>
+                                        </div>
+                                    </div>
+                                    <div class="form-outline mb-4">
+                                        <input type="password" formControlName="password" id="password"
+                                            placeholder="Password"
+                                            [ngClass]="{ 'is-invalid': submitted && formControls['password'].errors }"
+                                            class="form-control form-control-lg" />
+                                        <div *ngIf="formControls['password'].errors"
+                                            class="invalid-feedback">
+                                            <div *ngIf="formControls['password'].errors">Password is required</div>
+                                        </div>
+                                    </div>
+                                    <div class="pt-1 mb-4">
+                                        <button class="btn button-color btn-lg btn-block" type="submit">Login</button>
+                                    </div>
+                                    <div *ngIf="!loginValid" class="text-danger h6">
+                                        <div *ngIf="!loginValid">Wrong email or password!</div>
+                                    </div>
+                                    <a class="small text-muted" href="#!">Forgot password?</a>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

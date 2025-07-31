@@ -1,0 +1,15 @@
+.customers-header {
+    display: flex;
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
+}
+.button-cls {
+    border-radius: 8px;
+    border: 1px solid #02a9f7;
+    background: #02a9f7;
+    color: white;
+    width: 5em;
+    height: 2em;
+    text-decoration: none;
+}

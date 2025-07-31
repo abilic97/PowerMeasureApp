@@ -1,0 +1,18 @@
+@import "~bootstrap/dist/css/bootstrap.css";
+
+.dark-blue-color {
+    color: #01303f;
+}
+.blue-3-backgorund {
+    background-color: #02a9f7 !important;
+    border-color: #02a9f7 !important;
+    
+}
+
+.dark-blue-color-bg {
+    background: #01303f;
+}
+
+html  {
+    background-color: #f9f9f9;;
+  }

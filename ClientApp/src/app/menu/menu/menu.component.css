@@ -1,0 +1,24 @@
+.nav-container-style {
+    background: #01303f;
+}
+
+.dropdown-padding {
+    padding-right: 2em;
+}
+
+.nav-item-text-color {
+    color: #d4f0fc;
+}
+
+.border-remove {
+    border:none;
+}
+.nav-pills > li > a.active {
+    background-color: #02577a !important;
+}
+
+.header-s {
+    height: 5em;
+    text-transform: uppercase;
+    font-weight: 500;
+}

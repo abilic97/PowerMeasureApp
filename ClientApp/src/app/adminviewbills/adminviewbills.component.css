@@ -1,0 +1,40 @@
+.w-img {
+    width: 100%;
+}
+
+.bg-cls {
+    background: #f9f9f9;
+}
+html  {
+    background-color: #f9f9f9;;
+  } 
+
+.button-cls {
+    border-radius: 8px;
+    border: 1px solid #02a9f7;
+    background: #02a9f7;
+    color: white;
+    width: 5em;
+    height: 2em;
+}
+
+.center-title {
+    margin: auto;
+    width: 75%;
+    padding: 10px;
+}
+
+.t-a-c {
+    margin-top: 1em;
+    text-align: center;
+    color: #02577a;
+}
+
+.table-outlines {
+    background: white;
+    border-radius: 2em;
+    margin-left: 10em;
+    margin-right: 10em;
+    margin-top: 2em;
+    margin-bottom: 5em;
+}

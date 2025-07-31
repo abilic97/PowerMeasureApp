@@ -1,0 +1,18 @@
+.login-container {
+    background-color: #89d6fb;
+}
+
+.button-color {
+    background-color: #01303f;
+    color: #ffffff;
+}
+
+.logo-image-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-border {
+    border-radius: 1rem;
+}

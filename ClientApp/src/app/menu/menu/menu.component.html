@@ -1,0 +1,38 @@
+<div
+class="navbar nav-container-style header-s">
+<ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills navpills-color border-remove">
+    <li [ngbNavItem]="1"
+    *ngIf="!isAdmin"
+    ngbNavItem>
+      <a ngbNavLink
+      [routerLink]="['/dashboard']"
+       class="nav-item-text-color" ngbNavLink>Dashboard</a>
+    </li>
+    <li 
+    ngbNavItem
+     *ngIf="isAdmin"
+    >
+      <a 
+      ngbNavLink
+      [routerLink]="['/customers']" class="nav-item-text-color" ngbNavLink>Customers</a>
+    </li>
+    <li *ngIf="!isAdmin"
+    ngbNavItem
+    [ngbNavItem]="2"
+     [routerLink]="['/bills']" >
+      <a ngbNavLink class="nav-item-text-color" *ngIf="!isAdmin" ngbNavLink>Bills</a>
+    </li>
+    <li *ngIf="!isAdmin"
+    ngbNavItem
+    [ngbNavItem]="3"
+    [routerLink]="['/statistics']">
+     <a ngbNavLink class="nav-item-text-color" *ngIf="!isAdmin" ngbNavLink>Statistics</a>
+   </li>
+  </ul>
+  <li ngbDropdown class="nav-item nav dropdown-padding">
+    <a href (click)="false" class="nav-link nav-item-text-color" ngbDropdownToggle>{{userName}}</a>
+    <div ngbDropdownMenu>
+      <button (click)="onLogout()" ngbDropdownItem>Logout</button>
+    </div>
+  </li>
+</div>

@@ -1,0 +1,145 @@
+<app-menu></app-menu>
+<h1 class="p-4 dark-blue-color">Add New User to System</h1>
+<form [formGroup]="addUserForm" class="m-5" (ngSubmit)="submitUser()">
+    <div class="d-flex row-cols-2">
+        <div class="form-outline mb-4 p-2">
+            <label>First Name</label>
+            <input type="text" formControlName="firstName" placeholder="Enter first name"
+                class="form-control form-control-lg"
+                [ngClass]="{ 'is-invalid': submitted && formControls['firstName'].errors }" />
+            <div *ngIf="formControls['firstName'].errors" class="invalid-feedback">
+                <div *ngIf="formControls['firstName'].errors">Field is required</div>
+            </div>
+        </div>
+        <div class="form-outline mb-4 p-2">
+            <label>Last Name</label>
+            <input type="text" formControlName="lastName" placeholder="Enter last name"
+                class="form-control form-control-lg"
+                [ngClass]="{ 'is-invalid': submitted && formControls['lastName'].errors }" />
+            <div *ngIf="formControls['lastName'].errors" class="invalid-feedback">
+                <div *ngIf="formControls['lastName'].errors">Field is required</div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex row-cols-2">
+        <div class="form-outline mb-4 p-2">
+            <label>E-mail</label>
+            <input type="email" formControlName="email" placeholder="Enter e-mail" class="form-control form-control-lg"
+                [ngClass]="{ 'is-invalid': submitted && formControls['email'].errors }" />
+            <div *ngIf="formControls['email'].errors" class="invalid-feedback">
+                <div *ngIf="formControls['email'].errors">Field is required</div>
+            </div>
+        </div>
+        <div class="form-outline mb-4 p-2">
+            <label>Password</label>
+            <input type="text" formControlName="password" placeholder="Create new password"
+                class="form-control form-control-lg"
+                [ngClass]="{ 'is-invalid': submitted && formControls['password'].errors }" />
+            <div *ngIf="formControls['password'].errors" class="invalid-feedback">
+                <div *ngIf="formControls['password'].errors">Field is required</div>
+            </div>
+        </div>
+    </div>
+    <div class="p-2 col-1">
+        <label>User Active</label>
+        <div ngbDropdown>
+            <button type="button" class="btn btn-outline-primary w-button" id="dropdownBasic1" ngbDropdownToggle>
+                {{activeDisplayMsg}}</button>
+            <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+                <button type="button" (click)="selectUserActive('True')" ngbDropdownItem>True</button>
+                <button type="button" (click)="selectUserActive('False')" ngbDropdownItem>False</button>
+            </div>
+        </div>
+        <div *ngIf="submitted && formControls['userActive'].errors" class="e-msg">Field is required</div>
+    </div>
+    <div class="p-2 col-1">
+        <label>User Role</label>
+        <div ngbDropdown class="d-inline-block">
+            <button type="button" class="btn btn-outline-primary w-button" id="dropdownBasic1" ngbDropdownToggle>
+                {{userRole}}</button>
+            <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+                <button type="button" (click)="selectUserRole('Admin')" ngbDropdownItem>Admin</button>
+                <button type="button" (click)="selectUserRole('User')" ngbDropdownItem>User</button>
+            </div>
+        </div>
+        <div *ngIf="submitted && formControls['role'].errors" class="e-msg">Field is required</div>
+    </div>
+    <div class="d-flex row-cols-2">
+        <div class="form-outline mb-4 p-2">
+            <label>Contract Valid From</label>
+            <div class="d-flex m-h">
+                <button type="button" class="btn btn-outline-secondary calendar" (click)="d.toggle()" type="button">
+                    <i class="fa fa-calendar"></i>
+                </button>
+                <input class="form-control" placeholder="yyyy-mm-dd" [formControlName]="'contractValidFrom'" name="dp"
+                    [(ngModel)]="cvfmodel" ngbDatepicker #d="ngbDatepicker">
+            </div>
+            <div *ngIf="submitted && formControls['contractValidFrom'].errors" class="e-msg">Field is required</div>
+        </div>
+        <div class="form-outline mb-4 p-2">
+            <label>Contract Valid To</label>
+            <div class="d-flex m-h">
+                <button type="button" class="btn btn-outline-secondary calendar" (click)="d2.toggle()" type="button">
+                    <i class="fa fa-calendar"></i>
+                </button>
+                <input class="form-control" placeholder="yyyy-mm-dd" [formControlName]="'contractValidTo'" name="dp"
+                    [(ngModel)]="cvtmodel" ngbDatepicker #d2="ngbDatepicker">
+            </div>
+            <div *ngIf="submitted && formControls['contractValidTo'].errors" class="e-msg">Field is required</div>
+        </div>
+    </div>
+    <div class="d-flex row-cols-2">
+        <div class="form-outline mb-4 p-2">
+            <label>Energy Meter Valid From</label>
+            <div class="d-flex m-h">
+                <button type="button" class="btn btn-outline-secondary calendar" (click)="d3.toggle()" type="button">
+                    <i class="fa fa-calendar"></i>
+                </button>
+                <input class="form-control" placeholder="yyyy-mm-dd" [formControlName]="'emValidFrom'" name="d3"
+                    [(ngModel)]="emfmodel" ngbDatepicker #d3="ngbDatepicker">
+            </div>
+            <div *ngIf="submitted && formControls['emValidFrom'].errors" class="e-msg">Field is required</div>
+        </div>
+        <div class="form-outline mb-4 p-2">
+            <label>Energy Meter Valid to</label>
+            <div class="d-flex m-h">
+                <button type="button" class="btn btn-outline-secondary calendar" (click)="d4.toggle()" type="button">
+                    <i class="fa fa-calendar"></i>
+                </button>
+                <input class="form-control" placeholder="yyyy-mm-dd" [formControlName]="'emValidTo'" name="dp4"
+                    [(ngModel)]="emtmodel" ngbDatepicker #d4="ngbDatepicker">
+            </div>
+            <div *ngIf="submitted && formControls['emValidTo'].errors" class="e-msg">Field is required</div>
+        </div>
+    </div>
+
+    <div class="d-flex row-cols-2">
+        <div class="form-outline mb-4 p-2">
+            <label>Energy Meter Code</label>
+            <input formControlName="emCode" type="text" placeholder="Code" class="form-control form-control-lg"
+                [ngClass]="{ 'is-invalid': submitted && formControls['emCode'].errors }" />
+            <div *ngIf="formControls['emCode'].errors" class="invalid-feedback">
+                <div *ngIf="formControls['emCode'].errors">Field is required</div>
+            </div>
+        </div>
+        <div class="p-2 col-2">
+            <label>Energy Meter Active</label>
+            <div ngbDropdown>
+                <button type="button" class="btn btn-outline-primary w-button" id="dropdownBasic1" ngbDropdownToggle>
+                    {{emActiveMessage}}
+                </button>
+                <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
+                    <button type="button" (click)="selectEmActive('True')" ngbDropdownItem>True</button>
+                    <button type="button" (click)="selectEmActive('False')" ngbDropdownItem>False</button>
+                </div>
+            </div>
+            <div *ngIf="submitted && formControls['emActive'].errors" class="e-msg">Field is required</div>
+        </div>
+    </div>
+    <div class="text-center m-4">
+        <button type="submit" class="btn btn-primary blue-3-backgorund p-3">
+            <i class="fa fa-solid fa-plus"></i>
+            Add User</button>
+    </div>
+</form>
+<app-footer></app-footer>

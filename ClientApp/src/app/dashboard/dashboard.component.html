@@ -1,0 +1,17 @@
+<div>
+    <app-menu></app-menu>
+    <div>
+        <img src="./../../assets/preza_infografika.jpg" class="w-img" alt="header form" />
+    </div>
+    <div class="p-4">
+        <app-dailypowerstat></app-dailypowerstat>
+    </div>
+    <div class="d-flex row-cols-2">
+        <app-pending-bills></app-pending-bills>
+        <div *ngIf="mothlyApiData" class="m-2 text-center t-s p-4">
+            <div class="m-2 color-blue-dark"> Total monthly cost </div>
+            <app-totalcost [data]="mothlyApiData"></app-totalcost>
+        </div>
+    </div>
+    <app-footer></app-footer>
+</div>

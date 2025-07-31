@@ -1,0 +1,56 @@
+<div class="bg-cls">
+<app-menu></app-menu>
+<div>
+    <img src="./../../assets/testtest.webp" class="w-img" alt="header form" />
+</div>
+<div>
+    <h3 class="t-a-c">List of Bills</h3>
+</div>
+<div class="p-4 table-outlines">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Month</th>
+                <th scope="col">Due Date</th>
+                <th scope="col">Value</th>
+                <th scope="col">IsPaid</th>
+                <th scope="col">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let bill of slicedBills; index as i">
+                <th scope="row">{{ i + 1 }}</th>
+                <td>
+                    {{ bill.forMonth | date }}
+                </td>
+                <td>{{ bill.dueDate | date}}</td>
+                <td>{{ bill.billAmount | number}}</td>
+                <td>{{ bill.isPaid }}</td>
+                <td>
+                    <button class="button-cls" *ngIf="bill.isPaid == false"
+                    (click)="open(i, bill.id)"
+                    >Pay</button>
+                    <div *ngIf="bill.isPaid == true">
+                        <i class='fa fa-solid fa-check' style='color: green'></i>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="d-flex justify-content-between p-2">
+        <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+            (pageChange)="sliceData()">
+        </ngb-pagination>
+
+        <select class="form-select" style="width: auto" [(ngModel)]="pageSize" (ngModelChange)="sliceData()">
+            <option [ngValue]="7">7 items per page</option>
+            <option [ngValue]="24">24 items per page</option>
+            <option [ngValue]="48">48 items per page</option>
+        </select>
+    </div>
+</div>
+
+
+<app-footer></app-footer>
+</div>

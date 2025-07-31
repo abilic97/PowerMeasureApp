@@ -1,0 +1,66 @@
+<app-menu></app-menu>
+<div>
+
+    <div class="p-4 customers-header">
+        <div>
+            <h1 class="dark-blue-color">Users</h1>
+            <div>
+                <h6>{{usrCount}} users</h6>
+            </div>
+        </div>
+        <button (click)="redirectToAddUserForm()" class="btn btn-primary blue-3-backgorund">
+            <i class="fa fa-solid fa-plus"></i>
+            Add user</button>
+    </div>
+    <form class="p-4">
+        <div class="input-group">
+            <input id="table-filtering-search" class="form-control" placeholder="Search" type="text"
+                [formControl]="filter">
+            <button type="button" class="btn btn-primary blue-3-backgorund">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+    </form>
+    <div class="p-4">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Last Name</th>
+                    <th scope="col">E-mail</th>
+                    <th scope="col">IsActive</th>
+                    <th scope="col">Go to profile</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let userr of slicedData; index as i">
+                    <th scope="row">{{ i + 1 }}</th>
+                    <td>
+                        {{ userr.firstName }}
+                    </td>
+                    <td>{{ userr.lastName}}</td>
+                    <td>{{ userr.emailAddress }}</td>
+                    <td>{{ userr.isActive }}</td>
+                    <td>
+                        <a 
+                        [routerLink]="['/person', userr.id]"
+                        class="button-cls p-1">
+                        View User</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-between p-2">
+            <ngb-pagination [collectionSize]="collectionSize" [(page)]="page" [pageSize]="pageSize"
+                (pageChange)="sliceData()">
+            </ngb-pagination>
+
+            <select class="form-select" style="width: auto" [(ngModel)]="pageSize" (ngModelChange)="sliceData()">
+                <option [ngValue]="2">2 items per page</option>
+                <option [ngValue]="4">4 items per page</option>
+                <option [ngValue]="6">6 items per page</option>
+            </select>
+        </div>
+    </div>
+</div>

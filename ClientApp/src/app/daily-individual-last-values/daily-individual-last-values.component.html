@@ -1,0 +1,20 @@
+<div class="measurmentsContainer">
+    <div class="widthhh">
+        <div class="center-noof-cuts">
+            <p class="t-a-c"> Latest Power Value [kWh]</p>
+        </div>
+            <div echarts [options]="chartOptionP" [theme]="theme"></div>
+    </div>
+    <div class="widthhh">
+        <div class="center-noof-cuts">
+            <p class="t-a-c"> Latest Voltage Value [V]</p>
+        </div>
+        <div echarts [options]="chartOptionV" [theme]="theme"></div>
+    </div>
+    <div class="widthhh">
+        <div class="center-noof-cuts">
+            <p class="t-a-c"> Latest Current Value [A]</p>
+        </div>
+        <div echarts [options]="chartOptionC" [theme]="theme"></div>
+    </div>
+</div>

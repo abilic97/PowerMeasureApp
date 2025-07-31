@@ -1,0 +1,63 @@
+<app-menu></app-menu>
+<div>
+    <img src="./../../assets/big-data_cropped1.jpg" class="w-img" alt="header form" />
+</div>
+<div class="bg-lg">
+    <div class="p-4">
+        <h3>User profile</h3>
+        <div class="row-cols-auto">
+            <button class="m-r-2 button-cls" [ngClass]="{'button-cls-active': isMonthView === true}"
+                (click)="selectMonthView()">Month View</button>
+            <button class="m-r-2 button-cls" [ngClass]="{'button-cls-active': isDayView === true}"
+                (click)="selectDate()">Day View</button>
+                <button class="m-r-2 button-cls" [ngClass]="{'button-cls-active': isBills === true}"
+                (click)="selectBills()">Bills</button>
+            <form *ngIf="showDatePicker" class="row row-cols-sm-auto m-t-1">
+                <div class="col-12">
+                    <div class="input-group" [formGroup]="formGroup">
+                        <input class="form-control" placeholder="yyyy-mm-dd" [formControlName]="'date'" name="dp"
+                            [(ngModel)]="model" ngbDatepicker #d="ngbDatepicker">
+                        <button class="btn btn-outline-secondary calendar" (click)="d.toggle()" type="button">
+                            <i class="fa fa-calendar"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div *ngIf="isMonthView" class="p-4">
+
+        <div class="measurmentsContainer">
+            <div *ngIf="mothlyApiData" class="widthhh">
+                <div class="center-noof-cuts">
+                    <p class="t-a-c"> Total monthly cost [kwh]</p>
+                </div>
+                <app-totalcost [data]="mothlyApiData"></app-totalcost>
+            </div>
+            <div class="w-l">
+                <div class="center-noof-cuts">
+                    <p class="t-a-c"> Calculation</p>
+                </div>
+                <app-cost-calculator-legend></app-cost-calculator-legend>
+            </div>
+        </div>
+        <div *ngIf="mothlyApiData" class="center-noof-cuts">
+            <p class="t-a-c"> Monthly energy consumption [kWh]</p>
+            <app-mothlypowerconsuption [data]="mothlyApiData"></app-mothlypowerconsuption>
+        </div>
+        <div class="center-noof-cuts">
+            <p class="t-a-c"> Number of power cuts per month</p>
+            <app-noof-power-cuts [userId]="id"></app-noof-power-cuts>
+        </div>
+
+    </div>
+    <div *ngIf="isDayView" class="p-4">
+        <app-dailypowerstat [date]="formControls['date']" [userId]="id"></app-dailypowerstat>
+        <app-daily-total [date]="formControls['date']" [userId]="id"></app-daily-total>
+        <app-daily-cost [date]="formControls['date']" [userId]="id"></app-daily-cost>
+    </div>
+    <div *ngIf="isBills" class="p-4">
+        <app-adminviewbills [id]="id"></app-adminviewbills>
+    </div>
+</div>
+<app-footer></app-footer>

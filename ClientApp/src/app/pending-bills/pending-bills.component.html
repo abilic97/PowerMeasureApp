@@ -1,0 +1,25 @@
+<div class="p-4 table-outlines m-2 text-center">
+    <div class="t-s m-2 color-blue-dark">Pending bills</div>
+    <table class="table table-striped">
+        <thead>
+            <tr class="color-blue-dark">
+                <th scope="col">#</th>
+                <th scope="col">Month</th>
+                <th scope="col">Due Date</th>
+                <th scope="col">Value</th>
+                <th scope="col">Is Paid</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let bill of bills; index as i">
+                <th scope="row">{{ i + 1 }}</th>
+                <td>
+                    {{ bill.forMonth | date }}
+                </td>
+                <td>{{ bill.dueDate | date}}</td>
+                <td>{{ bill.billAmount | number}}</td>
+                <td>{{ bill.isPaid }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

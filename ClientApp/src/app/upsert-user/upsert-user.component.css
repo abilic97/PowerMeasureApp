@@ -1,0 +1,16 @@
+.w-button {
+    width: 8em !important;
+    min-height: calc(1.5em + 1rem + 2px);
+    color: #212529;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+}
+
+.e-msg {
+    color: #dc3545;
+    width: 10em;
+}
+
+.m-h {
+    min-height: calc(1.5em + 1rem + 2px);
+}

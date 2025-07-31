@@ -1,0 +1,22 @@
+.widthhh {
+    width: 341px;
+}
+
+.measurmentsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: space-evenly;
+}
+
+.center-noof-cuts {
+    margin: auto;
+    width: 75%;
+}
+.t-a-c{
+    text-align: center;
+    font-family: 'Montserrat';
+    font-weight: 700;
+    font-size: large;
+    color: #02577a;
+}

@@ -33,7 +33,6 @@ export class AdminviewbillsComponent implements OnInit {
   }
 
   getBills() {
-    console.log("here");
     let apiUrl = 'https://localhost:5001/api/payment/getBills/';
     let finalApi = apiUrl + this.id;
     this.http.get(finalApi).subscribe(
@@ -48,7 +47,6 @@ export class AdminviewbillsComponent implements OnInit {
         console.log(err);
       }
     );
-
   }
 
   sliceData() {

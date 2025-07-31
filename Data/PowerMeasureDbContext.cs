@@ -1,18 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PowerMeasure.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace PowerMeasure.Data
 {
     public class PowerMeasureDbContext : DbContext
     {
-        public PowerMeasureDbContext(DbContextOptions<PowerMeasureDbContext> options) : base(options)
-        {
-
-        }
+        public PowerMeasureDbContext(DbContextOptions<PowerMeasureDbContext> options)
+            : base(options) { }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User_Role>()

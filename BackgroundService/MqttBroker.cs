@@ -3,15 +3,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MQTTnet;
 using MQTTnet.Client;
-using MQTTnet.Server;
 using NCrontab;
 using PowerMeasure.Data;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using PowerMeasure.BackgroundService.Helper;
 using System.Text.Json;
 using System.Text;
 using PowerMeasure.Models;
@@ -21,39 +17,32 @@ namespace PowerMeasure.BackgroundService.Mqt
     public class MqttBroker : IHostedService
     {
         private Task _executingTask;
-        private readonly CancellationTokenSource _stoppingCts =
-                                                       new CancellationTokenSource();
+        private readonly CancellationTokenSource _stoppingCts = new CancellationTokenSource();
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger _iLogger;
         private PowerMeasureDbContext _powerMeasureDbContext;
-        private CrontabSchedule _schedule;
-        private DateTime _nextRun;
         protected string Schedule => "*/2 * * * *";
 
         public MqttBroker(IServiceScopeFactory scopeFactory, ILogger<MqttBroker> iLogger)
         {
             _scopeFactory = scopeFactory;
             _iLogger = iLogger;
-
         }
+
         public virtual Task StartAsync(CancellationToken cancellationToken)
         {
-            // store task
             _executingTask = ExecuteAsync(_stoppingCts.Token);
 
-            // return if running
             if (_executingTask.IsCompleted)
             {
                 return _executingTask;
             }
 
-            // running
             return Task.CompletedTask;
         }
 
         public virtual async Task StopAsync(CancellationToken cancellationToken)
         {
-            // Stop called without start
             if (_executingTask == null)
             {
                 return;
@@ -66,7 +55,6 @@ namespace PowerMeasure.BackgroundService.Mqt
             }
             finally
             {
-                // Wait until the task completes or the stop token triggers
                 await Task.WhenAny(_executingTask, Task.Delay(Timeout.Infinite,
                                                           cancellationToken));
             }
@@ -75,19 +63,21 @@ namespace PowerMeasure.BackgroundService.Mqt
         {
             do
             {
-
                 await Process();
 
                 await Task.Delay(5000, stoppingToken);
             }
             while (!stoppingToken.IsCancellationRequested);
         }
+
         protected async Task Process()
         {
-            var current = (String)null;
-            var energy = (String)null;
-            var voltage = (String)null;
+            string current = null;
+            string voltage = null;
+            string energy = null;
+
             var factory = new MqttFactory();
+
             IMqttClient mqttClient = factory.CreateMqttClient();
             var clientOptions = new MqttClientOptionsBuilder()
                 .WithTcpServer("test.mosquitto.org", 1883)
@@ -120,8 +110,8 @@ namespace PowerMeasure.BackgroundService.Mqt
                {
                    using (var scope = _scopeFactory.CreateScope())
                    {
-
                        _powerMeasureDbContext = scope.ServiceProvider.GetService<PowerMeasureDbContext>();
+
                        EnergyConsumed ec = new EnergyConsumed();
                        ec.Current = Convert.ToDouble(current);
                        ec.Voltage = Convert.ToDouble(voltage);
@@ -132,15 +122,13 @@ namespace PowerMeasure.BackgroundService.Mqt
                        _powerMeasureDbContext.Consumption.AddAsync(ec);
 
                        _powerMeasureDbContext.SaveChangesAsync();
-                       _iLogger.LogInformation($"saved to db ");
-
-
+                       _iLogger.LogInformation($"Energy consumed successfully saved to DB ");
                    }
-
                }
 
                return Task.CompletedTask;
            };
+
             await mqttClient.ConnectAsync(clientOptions, CancellationToken.None);
 
             var mqttSubscribeOptions = factory.CreateSubscribeOptionsBuilder()
@@ -148,7 +136,6 @@ namespace PowerMeasure.BackgroundService.Mqt
                 .Build();
 
             await mqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
-
         }
     }
 }

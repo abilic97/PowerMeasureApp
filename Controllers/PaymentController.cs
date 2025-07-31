@@ -2,7 +2,7 @@
 using Newtonsoft.Json.Linq;
 using PowerMeasure.Models;
 using PowerMeasure.Models.DTO;
-using PowerMeasure.Services;
+using PowerMeasure.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +20,7 @@ namespace PowerMeasure.Controllers
         {
             _payment = payment;
         }
-        // GET
+
         public IActionResult Index()
         {
             return Ok(new { message = "Hello world" });
@@ -85,6 +85,7 @@ namespace PowerMeasure.Controllers
             }
         }
 
+        //TODO: Separate to seperate Bills controller
         [HttpPost("addBill")]
         public Task<Bill> addBill([FromBody] Bill bill)
         {

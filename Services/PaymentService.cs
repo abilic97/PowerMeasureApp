@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Web;
 using System.Xml;
 using Newtonsoft.Json;
@@ -14,6 +13,7 @@ using Newtonsoft.Json.Linq;
 using System.Text;
 using PowerMeasure.Models;
 using PowerMeasure.Data;
+using PowerMeasure.Services.Interfaces;
 
 namespace PowerMeasure.Services
 {
@@ -21,11 +21,13 @@ namespace PowerMeasure.Services
     {
         private readonly RestClient _client;
         private PowerMeasureDbContext _powerMeasureDbContext;
+
         public PaymentService(PowerMeasureDbContext context)
         {
             _client = new RestClient("https://secure.paygate.co.za");
             _powerMeasureDbContext = context;
         }
+
         public async Task<CardPaymentResponse> AddNewCard(NewCard card)
         {
             CardPaymentResponse payResponse = new CardPaymentResponse
@@ -35,9 +37,7 @@ namespace PowerMeasure.Services
             RestRequest request = new RestRequest("/payhost/process.trans", Method.Post);
             request.AddHeader("Content-Type", "text/xml");
             request.AddHeader("SOAPAction", "WebPaymentRequest");
-            
 
-            // request body
             string body;
             using (StreamReader reader = new StreamReader(Directory.GetCurrentDirectory() + "/Templates/SinglePaymentRequest.xml"))
             {
@@ -53,17 +53,14 @@ namespace PowerMeasure.Services
             body = body.Replace("{CardNumber}", card.CardNumber.ToString());
             body = body.Replace("{CardExpiryDate}", card.CardExpiry.ToString());
             body = body.Replace("{CVV}", card.Cvv.ToString());
-            // body = body.Replace("{Vault}", false.ToString());
             body = body.Replace("{MerchantOrderId}", Guid.NewGuid().ToString());
-            // convert amount to cents (amount * 100)
             body = body.Replace("{Amount}", (card.Amount * 100).ToString("0000"));
             request.AddParameter("text/xml", body, ParameterType.RequestBody);
             RestResponse response = await _client.ExecuteAsync(request);
 
-            
+
             string[] map = { "SinglePaymentResponse", "CardPaymentResponse" };
             JToken? result = MapXmlResponseToObject(response.Content, map);
-            // check payment response
             if (result?["Status"] != null)
             {
                 payResponse.Response = JsonConvert.SerializeObject(result);
@@ -73,7 +70,7 @@ namespace PowerMeasure.Services
                     case "Error":
                         throw new ApplicationException();
 
-                    case "Completed" when paymentStatus?["ResultCode"] != null:
+                    case "Completed" when paymentStatus is JObject obj && obj["ResultCode"] != null:
                         payResponse.Completed = true;
                         payResponse.PayRequestId = paymentStatus?["PayRequestId"]?.ToString();
                         payResponse.Secure3DHtml = null;
@@ -88,7 +85,6 @@ namespace PowerMeasure.Services
                         throw new ApplicationException($"{paymentStatus?["ResultCode"]}: Payment declined");
 
                     case "ThreeDSecureRedirectRequired":
-                        // payment requires 3D verification
                         JToken? redirectXml = result["Redirect"];
                         if (redirectXml?["UrlParams"] != null)
                         {
@@ -126,7 +122,6 @@ namespace PowerMeasure.Services
             request.AddHeader("Content-Type", "text/xml");
             request.AddHeader("SOAPAction", "SingleVaultRequest");
 
-            // request body
             string body;
             using (StreamReader reader = new StreamReader(Directory.GetCurrentDirectory() + "/Templates/SingleVaultRequest.xml"))
             {
@@ -150,7 +145,6 @@ namespace PowerMeasure.Services
             request.AddHeader("Content-Type", "text/xml");
             request.AddHeader("SOAPAction", "SingleFollowUpRequest");
 
-            // request body
             string body;
             using (StreamReader reader = new StreamReader(Directory.GetCurrentDirectory() + "/Templates/SingleFollowUpRequest.xml"))
             {
@@ -166,49 +160,18 @@ namespace PowerMeasure.Services
             return MapXmlResponseToObject(response.Content, map);
         }
 
-        private static JToken? MapXmlResponseToObject(string xmlContent, string[]? responseKeys)
-        {
-            XmlDocument xmlResult = new XmlDocument();
-            // throws exception if it fails to parse xml
-            xmlResult.LoadXml(xmlContent);
-            // convert to json
-            string result = JsonConvert.SerializeXmlNode(xmlResult);
-            // remove prefix tags
-            result = Regex.Replace(result, @"\bns2:\b", "");
-            // parse as json object
-            JObject paymentResponse = JObject.Parse(result);
-            // return response
-            JToken? response = paymentResponse["SOAP-ENV:Envelope"]?["SOAP-ENV:Body"];
-            if (responseKeys != null)
-            {
-                response = responseKeys.Aggregate(response, (current, t) => current?[t]);
-            }
-            return response;
-        }
-
-        private static string ToUrlEncodedString(Dictionary<string, string?> request)
-        {
-            StringBuilder builder = new StringBuilder();
-            foreach (string key in request.Keys)
-            {
-                builder.Append("&");
-                builder.Append(key);
-                builder.Append("=");
-                builder.Append(HttpUtility.UrlEncode(request[key]));
-            }
-            string result = builder.ToString().TrimStart('&');
-            return result;
-        }
-
+        //TODO: Add Bills service
         public async Task<IEnumerable<Bill>> getAllBills(int userId)
         {
-            return _powerMeasureDbContext.Bills.Where(x => x.UsersId == userId).OrderBy(x=> x.Id).ToList();
+            return _powerMeasureDbContext.Bills.Where(x => x.UsersId == userId).OrderBy(x => x.Id).ToList();
         }
+
         public async Task<IEnumerable<Bill>> getAllPendingBills(int userId)
         {
             return _powerMeasureDbContext.Bills.Where(x => x.UsersId == userId && x.isPaid == false).ToList();
 
         }
+
         public async Task<Bill> addBill(Bill bill)
         {
             Users user = await _powerMeasureDbContext.Users.FindAsync(bill.UsersId);
@@ -226,6 +189,35 @@ namespace PowerMeasure.Services
             await _powerMeasureDbContext.Bills.AddAsync(nbill);
             await _powerMeasureDbContext.SaveChangesAsync();
             return nbill;
+        }
+
+        private static string ToUrlEncodedString(Dictionary<string, string?> request)
+        {
+            StringBuilder builder = new StringBuilder();
+            foreach (string key in request.Keys)
+            {
+                builder.Append("&");
+                builder.Append(key);
+                builder.Append("=");
+                builder.Append(HttpUtility.UrlEncode(request[key]));
+            }
+            string result = builder.ToString().TrimStart('&');
+            return result;
+        }
+
+        private static JToken? MapXmlResponseToObject(string xmlContent, string[]? responseKeys)
+        {
+            XmlDocument xmlResult = new XmlDocument();
+            xmlResult.LoadXml(xmlContent);
+            string result = JsonConvert.SerializeXmlNode(xmlResult);
+            result = Regex.Replace(result, @"\bns2:\b", "");
+            JObject paymentResponse = JObject.Parse(result);
+            JToken? response = paymentResponse["SOAP-ENV:Envelope"]?["SOAP-ENV:Body"];
+            if (responseKeys != null)
+            {
+                response = responseKeys.Aggregate(response, (current, t) => current?[t]);
+            }
+            return response;
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using PowerMeasure.Data;
 using PowerMeasure.Models;
+using PowerMeasure.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -21,7 +22,7 @@ namespace PowerMeasure.Services
         {
             this.configuration = configuration;
             _powerMeasureDbContext = contex;
-            
+
         }
         public Task<string> CreateTokenAsync(Users user)
         {
@@ -34,8 +35,8 @@ namespace PowerMeasure.Services
 
             var userRoles = _powerMeasureDbContext.User_Roles.Where(x => x.UserId == user.Id);
             var roles = (from rol in _powerMeasureDbContext.Roles
-                        join usr in userRoles on rol.Id equals usr.RoleId
-                        select rol.RoleName).ToList();
+                         join usr in userRoles on rol.Id equals usr.RoleId
+                         select rol.RoleName).ToList();
 
             roles.ForEach((role) =>
             {

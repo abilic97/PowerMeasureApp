@@ -1,25 +1,18 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 using PowerMeasure.Data;
 using PowerMeasure.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using PowerMeasure.BackgroundService;
 using PowerMeasure.BackgroundService.Mqt;
+using PowerMeasure.Services.Interfaces;
 
 namespace PowerMeasure
 {
@@ -32,9 +25,7 @@ namespace PowerMeasure
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        
         {
             services.AddCors(options =>
             {
@@ -45,9 +36,8 @@ namespace PowerMeasure
             });
 
             services.AddControllersWithViews()
-    .AddNewtonsoftJson(options =>
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-);
+                .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
             services.AddSpaStaticFiles(configuration =>
             {
@@ -57,16 +47,16 @@ namespace PowerMeasure
             services.AddDbContext<PowerMeasureDbContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("PowerMeasureConnection"));
-            }
-            );
+            });
+
             services.AddScoped<IUserInterface, UserService>();
             services.AddScoped<ITokenHandlerService, TokenHandlerService>();
             services.AddScoped<IConsumptionService, ConsumptionService>();
             services.AddScoped<IPaymentService, PaymentService>();
-     
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
-                { 
+                {
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
@@ -79,7 +69,6 @@ namespace PowerMeasure
             services.AddHostedService<MqttBroker>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())

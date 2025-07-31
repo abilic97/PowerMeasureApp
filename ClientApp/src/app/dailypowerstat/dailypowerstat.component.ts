@@ -36,10 +36,8 @@ export class DailypowerstatComponent implements OnInit {
 
     this.getDailyPowerStat(currentDate);
     this.date.valueChanges.subscribe(val => {
-      console.log(val, "here");
       if(typeof val != "undefined") {
         let selectedDate = new Date(val!.year, val!.month-1, val!.day, 0, 0 ,0);
-        console.log(selectedDate, "test");
         this.getDailyPowerStat(selectedDate);
       }
     });

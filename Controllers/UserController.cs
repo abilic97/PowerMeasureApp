@@ -2,10 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using PowerMeasure.Models;
 using PowerMeasure.Models.DTO;
-using PowerMeasure.Services;
-using System;
+using PowerMeasure.Services.Interfaces;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PowerMeasure.Controllers
@@ -28,6 +26,7 @@ namespace PowerMeasure.Controllers
         {
             return _userService.addUser(user);
         }
+
         [HttpGet("users")]
         [Authorize(Roles = "admin")]
         public Task<IEnumerable<Users>> getAllUsers()
@@ -39,7 +38,7 @@ namespace PowerMeasure.Controllers
         public async Task<IActionResult> login([FromBody] LoginRequest loginInfo)
         {
             var user = await _userService.authenticateUser(loginInfo.EmailAddress, loginInfo.Password);
-            if ( user != null)
+            if (user != null)
             {
                 var token = await _tokenService.CreateTokenAsync(user);
                 return Ok(new { Token = token });
@@ -49,7 +48,8 @@ namespace PowerMeasure.Controllers
         }
 
         [HttpGet("get-users-count")]
-        public async Task<int> getUsersCount() {
+        public async Task<int> getUsersCount()
+        {
             return await _userService.getUsersCount();
         }
 

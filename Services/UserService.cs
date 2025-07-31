@@ -2,9 +2,9 @@
 using PowerMeasure.Data;
 using PowerMeasure.Models;
 using PowerMeasure.Models.DTO;
+using PowerMeasure.Services.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -47,21 +47,11 @@ namespace PowerMeasure.Services
                 User = newUser,
                 Role = _powerMeasureDbContext.Roles.Where(x => x.RoleName == user.RoleName).FirstOrDefault()
             };
-          await  _powerMeasureDbContext.User_Roles.AddAsync(userrole);
+            await _powerMeasureDbContext.User_Roles.AddAsync(userrole);
 
 
             await _powerMeasureDbContext.SaveChangesAsync();
             return newUser;
-        }
-
-        public Task<int> deleteUser()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Users> getUser(int id)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<Users>> getUsers()
@@ -74,7 +64,8 @@ namespace PowerMeasure.Services
             return await users.ToListAsync();
         }
 
-        public async Task<int> getUsersCount() {
+        public async Task<int> getUsersCount()
+        {
             var users = from u in _powerMeasureDbContext.Users
                         join ur in _powerMeasureDbContext.User_Roles on u.Id equals ur.UserId
                         join r in _powerMeasureDbContext.Roles on ur.RoleId equals r.Id
@@ -93,11 +84,6 @@ namespace PowerMeasure.Services
                         select u;
             var count = users.Count();
             return count;
-        }
-
-        public Task updateUser(Users user)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<Users> authenticateUser(string email, string password)

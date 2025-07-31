@@ -48,7 +48,6 @@ export class BillsComponent implements OnInit {
   }
 
   getBills() {
-    console.log("here");
     let id = this.service.getUserIdFromToken();
     let apiUrl = 'https://localhost:5001/api/payment/getBills/';
     let finalApi = apiUrl + id;

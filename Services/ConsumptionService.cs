@@ -2,6 +2,7 @@
 using PowerMeasure.Data;
 using PowerMeasure.Models;
 using PowerMeasure.Models.DTO;
+using PowerMeasure.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,39 +27,29 @@ namespace PowerMeasure.Services
 
         }
 
-        private double calculateMonthlyCost(double kwhvalue)
+        public async Task<IEnumerable<PowerOutages>> calculatePowerOutagesPerMonthAsync(int userId)
         {
-            double mothlyCostwoPdv = (kwhvalue * pricePerkWh) + (kwhvalue * transitPerKwh) +
-                (kwhvalue * distributionPerKwh) + supplyPerMonth + measuringPlacePerMonth +
-                (kwhvalue * oiePerkwH);
+            var powerOutageReadings = GetPowerOutageReadings(userId);
 
-            double totalMonthlyCost = mothlyCostwoPdv + (mothlyCostwoPdv * pdv);
+            var monthlyOutages = await powerOutageReadings
+                .GroupBy(r => r.ReportDate.Month)
+                .Select(group => new PowerOutages
+                {
+                    count = group.Count(),
+                    date = group.Key
+                })
+                .ToListAsync();
 
-            return totalMonthlyCost;
+            return monthlyOutages;
         }
 
-        public async Task<IEnumerable<PowerOutages>> calculatePowerOutagesPerMonth(int userId)
+        public async Task<double> getTotalCostPerDay(int userId, DateTime date)
         {
-            var energyConsumed = (from u in _powerMeasureDbContext.Users
-                                  join uc in _powerMeasureDbContext.Contracts on u.Id equals uc.UsersId
-                                  join e in _powerMeasureDbContext.Meter on uc.Id equals e.UserContractRef
-                                  join ec in _powerMeasureDbContext.Consumption on e.Id equals ec.EnergyMeterId
-                                  where ec.Power == 0 && ec.Current == 0 && ec.Voltage == 0 &&
-                                  u.Id == userId && e.IndividualDevice == false
-                                  select ec); ;
+            Measurements m = getTotalConsumedEnergyValuePerDay(userId, date);
+            double finalPrice = (pricePerkWh * pdv) + pricePerkWh;
 
-            var thisss = await energyConsumed.GroupBy(x => x.ReportDate.Month).Select(x => new PowerOutages
-            {
-                count = x.Count(),
-                date = x.Key
-            }).ToListAsync();
-
-            return thisss;
-        }
-
-        public Task<IEnumerable<double>> calculateUserCostPerMonth(int userId)
-        {
-            throw new NotImplementedException();
+            double dailyCost = (m.P) * finalPrice;
+            return dailyCost;
         }
 
         public async Task<IEnumerable<MonthlyCost>> getConsumedEnergyForUserPerMonth(int userId)
@@ -77,47 +68,34 @@ namespace PowerMeasure.Services
             }).GroupBy(x => x.Dates.Month).Select(g => new MonthlyCost
             {
                 month = g.Key,
-                sum = g.Sum(m=> m.power)
+                sum = g.Sum(m => m.power)
             }).ToList();
 
-            foreach (var value in ddist) {
+            foreach (var value in ddist)
+            {
                 value.cost = calculateMonthlyCost(value.sum);
             }
-            return ddist.OrderBy(x=> x.month);
+            return ddist.OrderBy(x => x.month);
         }
 
         public Measurements getTotalConsumedEnergyValuePerDay(int userId, DateTime date)
         {
-            DateTime startDateTime = date;
-            DateTime endDateTime = date.AddDays(1).AddTicks(-1);
-            double intermediateSumkWh = 0;
-            double intermediateSumV = 0;
-            double intermediateSUmC = 0;
-            var energyConsumed = (from u in _powerMeasureDbContext.Users
-                                  join uc in _powerMeasureDbContext.Contracts on u.Id equals uc.UsersId
-                                  join e in _powerMeasureDbContext.Meter on uc.Id equals e.UserContractRef
-                                  join ec in _powerMeasureDbContext.Consumption on e.Id equals ec.EnergyMeterId
-                                  where ec.ReportDate >= startDateTime && ec.ReportDate <= endDateTime &&
-                                  u.Id == userId && e.IndividualDevice == false
-                                  select new Measurements
-                                  {
-                                      C = ec.Current,
-                                      V = ec.Voltage,
-                                      P = ec.Power
-                                  }).ToList();
+            var startDate = date.Date;
+            var endDate = date.Date.AddDays(1).AddTicks(-1);
 
-            energyConsumed.ForEach(value =>
-            {
-                intermediateSumkWh += (value.P / 1000) * 2;
-                intermediateSumV = (value.V);
-                intermediateSUmC = (value.C);
-            });
+            var dailyMeasurements = GetDailyMeasurements(userId, startDate, endDate);
 
-            Measurements m = new Measurements();
-            m.P = intermediateSumkWh / 60;
-            m.C = intermediateSUmC;
-            m.V = intermediateSumV;
-            return m;
+            return CalculateTotalDailyConsumption(dailyMeasurements);
+        }
+
+        public EnergyConsumed getLastEnergyValueDayIndividual(int userId, DateTime date)
+        {
+            var startOfDay = date.Date;
+            var endOfDay = date.Date.AddDays(1).AddTicks(-1);
+
+            return GetIndividualDeviceReadings(userId, startOfDay, endOfDay)
+                .OrderByDescending(reading => reading.Id)
+                .FirstOrDefault();
         }
 
         public EnergyConsumed getLastEnergyValueDay(int userId, DateTime date)
@@ -136,44 +114,96 @@ namespace PowerMeasure.Services
             return lastPowerValue.FirstOrDefault();
         }
 
-        public async Task<double> getTotalCostPerDay(int userId, DateTime date)
-        {
-            Measurements m =  getTotalConsumedEnergyValuePerDay(userId, date);
-            double finalPrice = (pricePerkWh * pdv) + pricePerkWh;
-
-            double dailyCost = (m.P) * finalPrice;
-            return dailyCost;
-
-        }
         public async Task<IEnumerable<EnergyConsumed>> getAllConsumedEnergyValuePerDayIndividual(int userId, DateTime date)
         {
             DateTime startDateTime = date;
             DateTime endDateTime = date.AddDays(1).AddTicks(-1);
             var allMeasurmentValues = (from u in _powerMeasureDbContext.Users
-                                  join uc in _powerMeasureDbContext.Contracts on u.Id equals uc.UsersId
-                                  join em in _powerMeasureDbContext.Meter on uc.Id equals em.UserContractRef
-                                  join ec in _powerMeasureDbContext.Consumption on em.Id equals ec.EnergyMeterId
-                                  where ec.ReportDate >= startDateTime && ec.ReportDate <= endDateTime && u.Id == userId
-                                  && em.IndividualDevice == true
-                                  orderby ec.Id descending
-                                  select ec);
+                                       join uc in _powerMeasureDbContext.Contracts on u.Id equals uc.UsersId
+                                       join em in _powerMeasureDbContext.Meter on uc.Id equals em.UserContractRef
+                                       join ec in _powerMeasureDbContext.Consumption on em.Id equals ec.EnergyMeterId
+                                       where ec.ReportDate >= startDateTime && ec.ReportDate <= endDateTime && u.Id == userId
+                                       && em.IndividualDevice == true
+                                       orderby ec.Id descending
+                                       select ec);
             return await allMeasurmentValues.ToListAsync();
 
         }
-        public EnergyConsumed getLastEnergyValueDayIndividual(int userId, DateTime date) 
-        {
-            DateTime startDateTime = date;
-            DateTime endDateTime = date.AddDays(1).AddTicks(-1);
-            var lastPowerValue = (from u in _powerMeasureDbContext.Users
-                                  join uc in _powerMeasureDbContext.Contracts on u.Id equals uc.UsersId
-                                  join em in _powerMeasureDbContext.Meter on uc.Id equals em.UserContractRef
-                                  join ec in _powerMeasureDbContext.Consumption on em.Id equals ec.EnergyMeterId
-                                  where ec.ReportDate >= startDateTime && ec.ReportDate <= endDateTime && u.Id == userId
-                                  && em.IndividualDevice == true
-                                  orderby ec.Id descending
-                                  select ec);
 
-            return lastPowerValue.FirstOrDefault();
+        private double calculateMonthlyCost(double kwhvalue)
+        {
+            double mothlyCostwoPdv = (kwhvalue * pricePerkWh) + (kwhvalue * transitPerKwh) +
+                (kwhvalue * distributionPerKwh) + supplyPerMonth + measuringPlacePerMonth +
+                (kwhvalue * oiePerkwH);
+
+            double totalMonthlyCost = mothlyCostwoPdv + (mothlyCostwoPdv * pdv);
+
+            return totalMonthlyCost;
+        }
+
+        private IQueryable<EnergyConsumed> GetPowerOutageReadings(int userId)
+        {
+            return from user in _powerMeasureDbContext.Users
+                   join contract in _powerMeasureDbContext.Contracts on user.Id equals contract.UsersId
+                   join meter in _powerMeasureDbContext.Meter on contract.Id equals meter.UserContractRef
+                   join reading in _powerMeasureDbContext.Consumption on meter.Id equals reading.EnergyMeterId
+                   where user.Id == userId &&
+                         meter.IndividualDevice == false &&
+                         reading.Power == 0 &&
+                         reading.Current == 0 &&
+                         reading.Voltage == 0
+                   select reading;
+        }
+
+        private List<Measurements> GetDailyMeasurements(int userId, DateTime start, DateTime end)
+        {
+            return (from user in _powerMeasureDbContext.Users
+                    join contract in _powerMeasureDbContext.Contracts on user.Id equals contract.UsersId
+                    join meter in _powerMeasureDbContext.Meter on contract.Id equals meter.UserContractRef
+                    join reading in _powerMeasureDbContext.Consumption on meter.Id equals reading.EnergyMeterId
+                    where user.Id == userId &&
+                          meter.IndividualDevice == false &&
+                          reading.ReportDate >= start &&
+                          reading.ReportDate <= end
+                    select new Measurements
+                    {
+                        C = reading.Current,
+                        V = reading.Voltage,
+                        P = reading.Power
+                    }).ToList();
+        }
+
+        private Measurements CalculateTotalDailyConsumption(IEnumerable<Measurements> readings)
+        {
+            if (!readings.Any())
+                return new Measurements(); 
+
+            const double IntervalMinutes = 2;
+            const double ConversionFactor = IntervalMinutes / 60.0; // To convert to kWh
+
+            double totalKWh = readings.Sum(r => (r.P / 1000.0) * ConversionFactor);
+            double averageVoltage = readings.Average(r => r.V);
+            double averageCurrent = readings.Average(r => r.C);
+
+            return new Measurements
+            {
+                P = totalKWh,
+                V = averageVoltage,
+                C = averageCurrent
+            };
+        }
+
+        private IQueryable<EnergyConsumed> GetIndividualDeviceReadings(int userId, DateTime start, DateTime end)
+        {
+            return from user in _powerMeasureDbContext.Users
+                   join contract in _powerMeasureDbContext.Contracts on user.Id equals contract.UsersId
+                   join meter in _powerMeasureDbContext.Meter on contract.Id equals meter.UserContractRef
+                   join reading in _powerMeasureDbContext.Consumption on meter.Id equals reading.EnergyMeterId
+                   where user.Id == userId
+                         && meter.IndividualDevice
+                         && reading.ReportDate >= start
+                         && reading.ReportDate <= end
+                   select reading;
         }
     }
 }

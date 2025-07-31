@@ -40,10 +40,8 @@ export class DailyTotalComponent implements OnInit {
 
     this.getDailyPowerStat(currentDate, yesterday);
     this.date.valueChanges.subscribe(val => {
-      console.log(val, "here");
       if (typeof val != "undefined") {
         let selectedDate = new Date(val!.year, val!.month - 1, val!.day, 0, 0, 0);
-        console.log(selectedDate, "test");
         let daybefore =new Date();
         daybefore.setDate(selectedDate.getDate() - 1);
         daybefore.setHours(0, 0, 0);
@@ -92,8 +90,6 @@ export class DailyTotalComponent implements OnInit {
     forkJoin([this.getcurrentdaily(date),
     this.getyesterdaydaily(yd)
     ]).subscribe(([data, ydData]: any) => {
-      // do stuff with data recieved
-      console.log(data, ydData, "testtest");
       this.apidata = data as Energy;
       this.apiDatay = ydData as Energy;
       this.initializeGraph(date, yd);

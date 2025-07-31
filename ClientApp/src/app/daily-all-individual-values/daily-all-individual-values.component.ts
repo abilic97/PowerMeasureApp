@@ -38,10 +38,8 @@ export class DailyAllIndividualValuesComponent implements OnInit {
     currentDate.setHours(0, 0, 0);
     this.getDailyPowerStatAll(currentDate);
     this.date.valueChanges.subscribe(val => {
-      console.log(val, "here");
       if (typeof val != "undefined") {
         let selectedDate = new Date(val!.year, val!.month - 1, val!.day, 0, 0, 0);
-        console.log(selectedDate, "test");
         this.getDailyPowerStatAll(selectedDate);
       }
     });

@@ -37,7 +37,7 @@ export class MenuComponent implements OnInit {
 
   ngOnInit(): void {
     this.getUser();
-    console.log("HERE",this.userName)
+    ("HERE",this.userName)
     this.adminDisplay();
   }
   ngOnDestroy() {
